@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('yaml');
 const winston = require('winston');
+const jwt = require('jsonwebtoken');
 
 // Configurar Winston
 const logger = winston.createLogger({
@@ -21,6 +22,26 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: 'logs/server.log' }) // Logs a archivo
   ]
 });
+
+// JWT middleware:
+const SECRET_KEY = "s_ke1";  // Clave secreta debe ser la misma
+
+// Middleware para validar JWT
+function verifyJwt(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ msg: 'Missing or invalid token' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    try {
+        const payload = jwt.verify(token, SECRET_KEY);
+        req.payload = payload;  // Pasar el payload a la siguiente función
+        next();
+    } catch (error) {
+        return res.status(401).json({ msg: 'Invalid token' });
+    }
+}
 
 // Crear la aplicación Express
 const app = express();
@@ -67,7 +88,7 @@ app.get('/redoc', (req, res) => {
 });
 
 
-app.get('/pelicula/:id', async (req, res) => {
+app.get('/pelicula/:id',verifyJwt, async (req, res) => {
   const peliculaId = parseInt(req.params.id);  // Convertir el ID a un número entero
   try {
     logger.info(`Buscando película con ID: ${peliculaId}`);
@@ -105,7 +126,7 @@ app.get('/pelicula/:id', async (req, res) => {
 });
 
 
-app.get('/director/:id', async (req, res) => {
+app.get('/director/:id', verifyJwt,async (req, res) => {
   const directorId = parseInt(req.params.id);  // Convertir el ID a un número entero
   try {
     logger.info(`Buscando director con ID: ${directorId}`);
@@ -138,7 +159,7 @@ app.get('/director/:id', async (req, res) => {
   }
 });
 
-app.get('/actor/:id', async (req, res) => {
+app.get('/actor/:id',verifyJwt, async (req, res) => {
   const actorId = parseInt(req.params.id); // Convertir el ID a un número entero
   try {
     logger.info(`Buscando actor con ID: ${actorId}`);
@@ -170,7 +191,7 @@ app.get('/actor/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al acceder a la base de datos' });
   }
 });
-app.get('/peliculas', async (req, res) => {
+app.get('/peliculas',verifyJwt, async (req, res) => {
   try {
     logger.info('Buscando todas las películas');
 

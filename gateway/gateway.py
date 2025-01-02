@@ -1,8 +1,12 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.responses import JSONResponse
 import httpx
 import json
 import os
+import jwt
+from datetime import datetime, timedelta
+from fastapi.security import HTTPBearer
+
 
 # URL del microservicio Flask
 USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://flask-api:5000")
@@ -20,6 +24,39 @@ app = FastAPI(
     redoc_url="/redoc"  # Ruta personalizada para la documentación en ReDoc
 )
 
+# JWT:
+SECRET_KEY = "s_ke1"
+ALGORITHM = "HS256"
+
+# Seguridad para extraer el token
+security = HTTPBearer()
+
+# Función para verificar el JWT
+def verify_jwt(http_authorization_credentials: str = Depends(security)):
+    """Verifica JWT en solicitudes protegidas.
+    Mediante Depends() podemos hacer una inyección de dependencia.
+    """
+    try:
+        token = http_authorization_credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+# Esta funcion genera un token JWT.
+# Este token es usado para que los microservicios solo respondan solicitudes
+# provenientes del gateway
+def generate_service_token():
+    payload = {
+        "sub": "gateway",  # Identidad del emisor
+        "exp": datetime.utcnow() + timedelta(minutes=10)  # Expiración
+    }
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return token
+
+
+
 # Endpoint de proxy para el microservicio de USUARIOS
 @app.api_route("/register", methods=["POST"])
 async def register_proxy(request: Request):
@@ -27,12 +64,28 @@ async def register_proxy(request: Request):
 
 @app.api_route("/login", methods=["POST"])
 async def login_proxy(request: Request):
-    return await proxy_request(request, USER_SERVICE_URL)
+    response = await proxy_request(request, USER_SERVICE_URL)
+    if response.status_code == 200:  # Login exitoso
+        body = await request.json()
+        username = body.get("username")
+        if not username:
+            raise HTTPException(status_code=400, detail="Username is required")
+        # Crear el JWT
+        payload = {
+            "sub": username,
+            "exp": datetime.utcnow() + timedelta(hours=2),
+        }
+        token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+        return {"access_token": token, "token_type": "bearer"}
+    else:
+        raise HTTPException(status_code=response.status_code, detail="Login failed")
+
 
 @app.api_route("/add_review", methods=["POST"])
-async def add_review_proxy(request: Request):
+async def add_review_proxy(request: Request, payload: dict = Depends(verify_jwt)):
+    """Proxy para agregar reseñas, protegido por JWT."""
+    # El payload contiene los datos decodificados del token
     return await proxy_request(request, USER_SERVICE_URL)
-
 # Endpoint de proxy para el microservicio de PELICULAS
 @app.api_route("/pelicula/{id}", methods=["GET"])
 async def get_pelicula_proxy(request: Request):
@@ -52,9 +105,11 @@ async def get_all_peliculas_proxy(request: Request):
 # Función para reenviar las solicitudes al microservicio Flask
 async def proxy_request(request: Request, service_url: str):
     method = request.method
+    token = generate_service_token() # Generamos el token que autentica al gateway
     url = f"{service_url}{request.url.path}"
     print(f"Redirect to: {url}")
     headers = dict(request.headers)
+    headers["Authorization"] = f"Bearer {token}"
     content = await request.body()
 
     try:

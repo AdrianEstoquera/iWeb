@@ -5,6 +5,8 @@ from models import db, User, Review
 from config import Config
 from flask import jsonify
 from flasgger import Swagger
+import jwt
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 app = Flask(__name__)
 
@@ -18,10 +20,32 @@ swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL)
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 swagger = Swagger(app)
 
+# JWT middleware:
+SECRET_KEY = "s_ke1"
+def verify_jwt():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"msg": "Missing or invalid token"}), 401
+    
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return payload
+    except ExpiredSignatureError:
+        return jsonify({"msg": "Token expired"}), 401
+    except InvalidTokenError:
+        return jsonify({"msg": "Invalid token"}), 401
+
+
 
 # Endpoint de registro de usuario
 @app.route('/register', methods=['POST'])
 def register():
+    # Validar JWT
+    validation_response = verify_jwt()
+    if isinstance(validation_response, tuple):  # Si hubo error
+        return validation_response
+    
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
@@ -39,6 +63,11 @@ def register():
 # Endpoint de login de usuario
 @app.route('/login', methods=['POST'])
 def login():
+    # Validar JWT
+    validation_response = verify_jwt()
+    if isinstance(validation_response, tuple):  # Si hubo error
+        return validation_response
+    
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
@@ -53,6 +82,11 @@ def login():
 # Endpoint para añadir review
 @app.route('/add_review', methods=['POST'])
 def add_review():
+    # Validar JWT
+    validation_response = verify_jwt()
+    if isinstance(validation_response, tuple):  # Si hubo error
+        return validation_response
+    
     data = request.get_json()
     user_id = data.get('user_id')  # Recibimos el user_id directamente del JSON
     movie_id = data.get('movie_id')
