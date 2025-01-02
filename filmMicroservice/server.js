@@ -50,7 +50,8 @@ const port = 3000;
 // Configuración de la conexión a Neo4j usando variables de entorno
 const driver = neo4j.driver(
   `bolt://${process.env.NEO4J_HOST}:${process.env.NEO4J_PORT}`, // Usamos las variables de entorno del contenedor
-  neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD)
+  neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD),
+  { disableLosslessIntegers: true }
 );
 
 // Crear una sesión
@@ -99,8 +100,8 @@ app.get('/pelicula/:id',verifyJwt, async (req, res) => {
       OPTIONAL MATCH (p)<-[:ACTUA]-(a:Actor)
       OPTIONAL MATCH (p)<-[:DIRIGE]-(d:Director)
       WITH p, 
-           collect(DISTINCT a {nombre: a.nombre, foto: a.foto}) AS actores, 
-           collect(DISTINCT d {nombre: d.nombre, foto: d.foto}) AS directores
+           collect(DISTINCT a {nombre: a.nombre, foto: a.foto, id: toInteger(id(a))}) AS actores, 
+           collect(DISTINCT d {nombre: d.nombre, foto: d.foto, id: toInteger(id(d))}) AS directores
       RETURN p {titulo: p.titulo, 
                 año: p.año, 
                 crítica: p.crítica, 
@@ -131,18 +132,24 @@ app.get('/director/:id', verifyJwt,async (req, res) => {
   try {
     logger.info(`Buscando director con ID: ${directorId}`);
     const result = await session.run(
-      `MATCH (d:Director)
+      `MATCH(d:Director)
       WHERE id(d) = $id
-      OPTIONAL MATCH (d)-[:DIRIGE]->(p:Película)
-      WITH d, 
-           collect(DISTINCT p {titulo: p.titulo, año: p.año, crítica: p.crítica, foto: p.foto}) AS peliculas
-      RETURN d {
-               nombre: d.nombre,
-               foto: d.foto,
-               fecha_nacimiento: d.fecha_nacimiento,
-               biografia: d.biografia,
-               peliculas: peliculas
-      } AS director`,
+        OPTIONAL MATCH (d)-[:DIRIGE]->(p:Película)
+        WITH d, 
+            collect(DISTINCT p {
+                id: toInteger(id(p)), 
+                titulo: p.titulo, 
+                año: p.año, 
+                crítica: p.crítica, 
+                foto: p.foto
+            }) AS peliculas
+        RETURN d {
+                id: toInteger(id(d))
+                nombre: d.nombre,
+                foto: d.foto,
+                fecha_nacimiento: d.fecha_nacimiento,
+                biografia: d.biografia,
+                peliculas: peliculas`,
       { id: directorId }
     );
 
@@ -168,7 +175,7 @@ app.get('/actor/:id',verifyJwt, async (req, res) => {
       WHERE id(a) = $id
       OPTIONAL MATCH (a)-[:ACTUA]->(p:Película)
       WITH a, 
-           collect(DISTINCT p {titulo: p.titulo, año: p.año, crítica: p.crítica, foto: p.foto}) AS peliculas
+           collect(DISTINCT p {titulo: p.titulo, año: p.año, crítica: p.crítica, foto: p.foto, id: toInteger(id(p))}) AS peliculas
       RETURN a {
                nombre: a.nombre,
                foto: a.foto,
@@ -200,9 +207,10 @@ app.get('/peliculas',verifyJwt, async (req, res) => {
       OPTIONAL MATCH (p)<-[:ACTUA]-(a:Actor)
       OPTIONAL MATCH (p)<-[:DIRIGE]-(d:Director)
       WITH DISTINCT p, 
-           collect(DISTINCT a {nombre: a.nombre, foto: a.foto}) AS actores, 
-           collect(DISTINCT d {nombre: d.nombre, foto: d.foto}) AS directores
+           collect(DISTINCT a {nombre: a.nombre, foto: a.foto, id: toInteger(id(a))}) AS actores, 
+           collect(DISTINCT d {nombre: d.nombre, foto: d.foto, id: toInteger(id(d))}) AS directores
       RETURN DISTINCT p {
+               id: id(p),
                titulo: p.titulo,
                año: p.año,
                crítica: p.crítica,
@@ -224,7 +232,6 @@ app.get('/peliculas',verifyJwt, async (req, res) => {
 
 app.get('/health', async (req, res) => {
   try {
-    logger.info('Realizando comprobación de salud');
     await session.run('RETURN 1');
     res.json({ status: 'healthy' });
   } catch (error) {
