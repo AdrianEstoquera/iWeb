@@ -1,0 +1,108 @@
+services:
+  user_microservice:
+    build: ./userMicroservice
+    container_name: flask-api
+    ports:
+      - "5000:5000"
+    depends_on:
+      mysql-container:
+        condition: service_healthy
+    networks:
+      - cineview-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  fastapi-gateway:
+    build: ./gateway
+    container_name: fastapi-gateway
+    ports:
+      - "8080:8080"  # Exponer el puerto 8080 para FastAPI
+    environment:
+      - USER_SERVICE_URL=http://user_microservice:5000  # URL del microservicio Flask dentro de la red Docker
+      - FILM_SERVICE_URL=http://film_microservice:3000
+    depends_on:
+      user_microservice:
+        condition: service_healthy # Espera a que Flask pueda esperar solicitudes
+      film_microservice:
+        condition: service_healthy
+    networks:
+      - cineview-network
+
+  mysql-container:
+    image: mysql:8.0
+    container_name: mysql-container
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: cineViewUsers
+      MYSQL_USER: cinemaViewWeb
+      MYSQL_PASSWORD: pass
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cineview-network
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  film_microservice:
+    build: ./filmMicroService
+    container_name: film-api
+    ports:
+      - "3000:3000"
+    environment:
+      NEO4J_HOST: neo4j
+      NEO4J_PORT: 7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: neo4jpassword
+      FILM_SERVICE_URL: http://film_microservice:3000
+    depends_on:
+      - neo4j
+    networks:
+      - cineview-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 1s
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+
+  neo4j:
+    image: neo4j:3.5.19
+    container_name: neo4j-container
+    environment:
+      NEO4J_AUTH: neo4j/neo4jpassword  # Usuario y contraseña para Neo4j
+    ports:
+      - "7474:7474"  # Puerto HTTP para la interfaz de Neo4j (Interfaz web)
+      - "7687:7687"  # Puerto Bolt para conexiones de Neo4j
+    networks:
+      - cineview-network
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:7474/db/neo4j/tx/commit"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 10s
+
+networks:
+  cineview-network:
+    driver: bridge  # Red bridge entre los contenedores
+
+volumes:
+  mysql_data:
+  neo4j_data:
+  neo4j_logs:

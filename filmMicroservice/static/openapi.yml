@@ -1,0 +1,264 @@
+openapi: 3.0.0
+info:
+  title: API de Películas y Actores
+  description: API para consultar información sobre películas, actores y directores.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Servidor local
+paths:
+  /pelicula/{id}:
+    get:
+      summary: Obtener detalles de una película
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la película
+          schema:
+            type: integer
+            example: 5
+      responses:
+        '200':
+          description: Información detallada de la película
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  titulo:
+                    type: string
+                  año:
+                    type: integer
+                  crítica:
+                    type: number
+                    format: float
+                  sinopsis:
+                    type: string
+                  foto:
+                    type: string
+                  actores:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        nombre:
+                          type: string
+                        foto:
+                          type: string
+                  directores:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        nombre:
+                          type: string
+                        foto:
+                          type: string
+              example:
+                titulo: "Inception"
+                año: 2010
+                crítica: 9.3
+                sinopsis: "Un ladrón que roba secretos a través del uso de la tecnología de sueños compartidos es dado una tarea imposible: implantar una idea en la mente de un C.E.O."
+                foto: "https://example.com/inception.jpg"
+                actores:
+                  - nombre: "Leonardo DiCaprio"
+                    foto: "https://example.com/dicaprio.jpg"
+                  - nombre: "Joseph Gordon-Levitt"
+                    foto: "https://example.com/gordon-levitt.jpg"
+                directores:
+                  - nombre: "Christopher Nolan"
+                    foto: "https://example.com/nolan.jpg"
+        '404':
+          description: Película no encontrada
+        '500':
+          description: Error del servidor
+  /director/{id}:
+    get:
+      summary: Obtener detalles de un director
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del director
+          schema:
+            type: integer
+            example: 9
+      responses:
+        '200':
+          description: Información detallada del director
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nombre:
+                    type: string
+                  foto:
+                    type: string
+                  fecha_nacimiento:
+                    type: string
+                    format: date
+                  biografia:
+                    type: string
+                  peliculas:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        titulo:
+                          type: string
+                        año:
+                          type: integer
+                        crítica:
+                          type: number
+                          format: float
+                        foto:
+                          type: string
+              example:
+                nombre: "Christopher Nolan"
+                foto: "https://example.com/nolan.jpg"
+                fecha_nacimiento: "1970-07-30"
+                biografia: "Christopher Nolan es un director británico conocido por sus películas de ciencia ficción y acción como Inception y la trilogía de Batman."
+                peliculas:
+                  - titulo: "Inception"
+                    año: 2010
+                    crítica: 9.3
+                    foto: "https://example.com/inception.jpg"
+                  - titulo: "Interstellar"
+                    año: 2014
+                    crítica: 8.6
+                    foto: "https://example.com/interstellar.jpg"
+        '404':
+          description: Director no encontrado
+        '500':
+          description: Error del servidor
+  /actor/{id}:
+    get:
+      summary: Obtener detalles de un actor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del actor
+          schema:
+            type: integer
+            example: 8
+      responses:
+        '200':
+          description: Información detallada del actor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nombre:
+                    type: string
+                  foto:
+                    type: string
+                  fecha_nacimiento:
+                    type: string
+                    format: date
+                  biografia:
+                    type: string
+                  peliculas:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        titulo:
+                          type: string
+                        año:
+                          type: integer
+                        crítica:
+                          type: number
+                          format: float
+                        foto:
+                          type: string
+              example:
+                nombre: "Leonardo DiCaprio"
+                foto: "https://example.com/dicaprio.jpg"
+                fecha_nacimiento: "1974-11-11"
+                biografia: "Leonardo DiCaprio es un actor estadounidense conocido por sus papeles en Titanic, Inception, y El Renacido."
+                peliculas:
+                  - titulo: "Inception"
+                    año: 2010
+                    crítica: 9.3
+                    foto: "https://example.com/inception.jpg"
+                  - titulo: "El Renacido"
+                    año: 2015
+                    crítica: 8.1
+                    foto: "https://example.com/renacido.jpg"
+        '404':
+          description: Actor no encontrado
+        '500':
+          description: Error del servidor
+  /peliculas:
+    get:
+      summary: Obtener todas las películas
+      responses:
+        '200':
+          description: Lista de todas las películas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    titulo:
+                      type: string
+                    año:
+                      type: integer
+                    crítica:
+                      type: number
+                      format: float
+                    sinopsis:
+                      type: string
+                    foto:
+                      type: string
+                    actores:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          nombre:
+                            type: string
+                          foto:
+                            type: string
+                    directores:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          nombre:
+                            type: string
+                          foto:
+                            type: string
+              example:
+                - titulo: "Inception"
+                  año: 2010
+                  crítica: 9.3
+                  sinopsis: "Un ladrón que roba secretos usando tecnología de sueños compartidos."
+                  foto: "https://example.com/inception.jpg"
+                  actores:
+                    - nombre: "Leonardo DiCaprio"
+                      foto: "https://example.com/dicaprio.jpg"
+                  directores:
+                    - nombre: "Christopher Nolan"
+                      foto: "https://example.com/nolan.jpg"
+                - titulo: "Interstellar"
+                  año: 2014
+                  crítica: 8.6
+                  sinopsis: "Una misión para encontrar un nuevo hogar para la humanidad."
+                  foto: "https://example.com/interstellar.jpg"
+                  actores:
+                    - nombre: "Matthew McConaughey"
+                      foto: "https://example.com/mcconaughey.jpg"
+                  directores:
+                    - nombre: "Christopher Nolan"
+                      foto: "https://example.com/nolan.jpg"
+        '404':
+          description: No se encontraron películas
+        '500':
+          description: Error del servidor
