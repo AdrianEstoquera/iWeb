@@ -6,7 +6,9 @@ import os
 import jwt
 from datetime import datetime, timedelta
 from fastapi.security import HTTPBearer
-
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 
 # URL del microservicio Flask
 USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://flask-api:5000")
@@ -86,6 +88,9 @@ async def add_review_proxy(request: Request, payload: dict = Depends(verify_jwt)
     """Proxy para agregar reseñas, protegido por JWT."""
     # El payload contiene los datos decodificados del token
     return await proxy_request(request, USER_SERVICE_URL)
+@app.api_route("/get_reviews_for_film_id", methods=["POST"])
+async def register_proxy(request: Request):
+    return await proxy_request(request, USER_SERVICE_URL)
 # Endpoint de proxy para el microservicio de PELICULAS
 @app.api_route("/pelicula/{id}", methods=["GET"])
 async def get_pelicula_proxy(request: Request):
@@ -102,7 +107,7 @@ async def get_actor_proxy(request: Request):
 async def get_all_peliculas_proxy(request: Request):
     return await proxy_request(request, FILM_SERVICE_URL)
 
-# Función para reenviar las solicitudes al microservicio Flask
+# Función para reenviar las solicitudes al rest de microservicios
 async def proxy_request(request: Request, service_url: str):
     method = request.method
     token = generate_service_token() # Generamos el token que autentica al gateway
@@ -164,6 +169,74 @@ async def load_combined_openapi():
 @app.on_event("shutdown")
 async def shutdown():
     await client.aclose()
+
+# Servicio de paginas HTML:
+
+# Mount static files and templates
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+# Pagina principal
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+@app.get("/register_user", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("register_user.html", {"request": request})
+@app.get("/home_page", response_class=HTMLResponse)
+async def home_page(request: Request):
+    # Hacer una solicitud para obtener todas las películas
+    async with httpx.AsyncClient() as client:
+        response = await client.get("http://localhost:8080/peliculas")
+        peliculas = response.json()
+
+    # Pasar las películas a la plantilla
+    return templates.TemplateResponse("home_page.html", {"request": request, "peliculas": peliculas})
+@app.get("/film_page/{id_pelicula}", response_class=HTMLResponse)
+async def read_film_page(request: Request, id_pelicula: int):
+    # Obtener la información de la película
+    async with httpx.AsyncClient() as client:
+        pelicula_response = await client.get(f"http://localhost:8080/pelicula/{id_pelicula}")
+        pelicula = pelicula_response.json()
+
+        # Obtener los actores de la película
+        actores = [(actor["nombre"], actor["id"], actor["foto"]) for actor in pelicula["actores"]]
+
+        # Obtener los directores de la película
+        directores = [(director["nombre"], director["id"], director["foto"]) for director in pelicula["directores"]]
+        
+        
+        # Obtener las reseñas de la película
+        reviews_response = await client.post("http://localhost:8080/get_reviews_for_film_id", json={"movie_id": id_pelicula})
+        reviews = reviews_response.json().get("reviews", [])
+
+    # Pasar los datos a la plantilla
+    return templates.TemplateResponse(
+        "film_page.html",
+        {
+            "request": request,
+            "nombre": pelicula["titulo"],
+            "anio": pelicula["año"],
+            "actores": actores,
+            "directores": directores,
+            "sinopsis": pelicula["sinopsis"],
+            "foto_car_tula": pelicula["foto"],
+            "reviews": reviews,
+        }
+    )
+
+@app.get("/director_page/{id_director}", response_class=HTMLResponse)
+async def read_film_page(request: Request, id_director: int):
+    # Obtenemos infor del director
+    director_response = await client.get(f"http://localhost:8080/director/{id_director}")
+    director = director_response.json()
+    return templates.TemplateResponse("director_page.html", {"request": request, "director": director})
+
+@app.get("/actor_page/{id}", response_class=HTMLResponse)
+async def read_film_page(request: Request, id: int):
+    # Obtenemos infor del director
+    resp = await client.get(f"http://localhost:8080/actor/{id}")
+    actor = resp.json()
+    return templates.TemplateResponse("actor_page.html", {"request": request, "actor": actor})
 
 if __name__ == "__main__":
     import uvicorn

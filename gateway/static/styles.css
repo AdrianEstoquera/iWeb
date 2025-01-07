@@ -1,0 +1,273 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f3f3f3;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
+    height: 100vh; /* Asegura que el contenedor ocupe toda la altura de la ventana */
+    flex-direction: column;
+}
+
+.centered-div {
+    width: 80%; /* Ajusta el ancho del div */
+    max-width: 600px; /* Limita el ancho máximo si es necesario */
+    background-color: #fff; 
+    padding: 20px; /* Espaciado interno */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    text-align: center; /* Centra el contenido del texto */
+}
+
+.container {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px 40px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+h1 {
+    color: #28a745;
+    margin-bottom: 10px;
+}
+
+h2 {
+    color: #6c757d;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+input:focus {
+    border-color: #28a745;
+    outline: none;
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+button#registerBtn {
+    background-color: #6c757d;
+}
+
+button#registerBtn:hover {
+    background-color: #5a6268;
+}
+header h1 {
+    color: #28a745;
+    margin-bottom: 20px;
+    font-size: 2em;
+}
+
+.carousel-wrapper {
+    width: 100%;
+    max-width: 1200px; /* Tamaño máximo para el carrusel */
+    overflow: hidden; /* Esconde las imágenes que se salgan del contenedor */
+}
+
+.carousel-container {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+    gap: 15px; /* Espacio entre las imágenes */
+}
+
+.imgContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 200px; /* Establece el tamaño de cada contenedor de imagen */
+    flex-shrink: 0; /* Evita que los contenedores se encojan */
+}
+
+.imgContainer img {
+    width: 100%; /* Ajusta la imagen al ancho de su contenedor */
+    height: auto; /* Mantiene la proporción de la imagen */
+    max-width: 200px; /* Limita el tamaño máximo de la imagen */
+    max-height: 300px; /* Limita la altura máxima de la imagen */
+    object-fit: cover; /* Asegura que la imagen se recorte correctamente para llenar el contenedor */
+    border-radius: 8px;
+}
+
+h3 {
+    color: #333;
+    margin-top: 10px;
+    font-size: 1.2em;
+    text-align: center;
+}
+
+p {
+    color: #777;
+    font-size: 0.9em;
+    text-align: center;
+    margin-top: 5px;
+}
+
+button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    line-height: 1.6;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.5rem;
+    letter-spacing: 1px;
+}
+
+h2, h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+h3 {
+    font-size: 1.3rem;
+}
+
+/* Director Page */
+.movie-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.movie-header h2 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+.critica {
+    font-size: 1rem;
+    color: #555;
+    margin-top: 5px;
+}
+
+.movie-poster img {
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;
+    max-width: 200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sinopsis {
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sinopsis h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.actors ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.actors li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.actors img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+}
+
+.actors a {
+    color: #0077cc;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+.actors a:hover {
+    text-decoration: underline;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: row; /* Esto alinea los elementos en horizontal */
+}
+.left-container {
+    margin-right: auto; /* Empuja el siguiente elemento hacia la derecha */
+}
+
+.right-container {
+    margin-left: auto; /* Empuja el anterior elemento hacia la izquierda */
+}

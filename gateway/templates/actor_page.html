@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineView - Actor</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <main class=".centered-div">
+        <h1>🎬 CineView</h1>
+        <div class="movie-container">
+            <div class="flex-container">
+                <div class="movie-header left-container">
+                    <h2>{{ actor.nombre }}</h2>
+                    <p class="critica">{{ actor.fecha_nacimiento }}</p>
+                </div>
+                <div class="movie-poster right-container">
+                    <img src="{{ actor.foto }}" alt="Foto de {{ actor.nombre }}">
+                </div>
+            </div>
+            <div class="sinopsis">
+                <h3>Biografía</h3>
+                <p>{{ actor.biografia }}</p>
+            </div>
+
+            <div class="actors">
+                <h3>Películas destacadas</h3>
+                <ul>
+                    {% for pelicula in actor.peliculas %}
+                    <li>
+                        <img src="{{ pelicula.foto }}" alt="{{ pelicula.titulo }}">
+                        <div>
+                            <p><strong>{{ pelicula.titulo }}</strong> ({{ pelicula.año }})</p>
+                            <p>Crítica: {{ pelicula.crítica }}/10</p>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

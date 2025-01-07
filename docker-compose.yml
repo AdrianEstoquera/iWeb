@@ -73,7 +73,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 1s
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs

@@ -101,6 +101,38 @@ def add_review():
     
     return jsonify({"msg": "Review added successfully"}), 201
 
+@app.route("/get_reviews_for_film_id", methods=["POST"])
+def get_reviews_for_film_id():
+    # Validar JWT
+    validation_response = verify_jwt()
+    if isinstance(validation_response, tuple):  # Si hubo error
+        return validation_response
+    
+    # Obtener el ID de la película del cuerpo de la solicitud
+    data = request.get_json()
+    movie_id = data.get('movie_id')
+
+    # Verificar que se haya proporcionado un movie_id
+    if not movie_id:
+        return jsonify({"msg": "Movie ID is required"}), 400
+    
+    # Obtener las reviews de la base de datos para la película especificada con el username
+    reviews = db.session.query(Review, User).join(User, Review.user_id == User.id).filter(Review.movie_id == movie_id).all()
+    
+    # Si no hay reseñas, retornar un mensaje indicando que no hay reseñas para esa película
+    if not reviews:
+        return jsonify({"reviews": []}), 404
+    
+    # Formatear las reseñas para devolverlas de manera estructurada
+    reviews_data = []
+    for review, user in reviews:
+        reviews_data.append({
+            "username": user.username,
+            "content": review.content,
+        })
+    
+    return jsonify({"reviews": reviews_data}), 200
+
 import yaml
 import os
 

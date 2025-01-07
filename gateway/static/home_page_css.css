@@ -1,0 +1,102 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+header {
+    background-color: #222;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+main {
+    padding: 20px;
+}
+
+.caratula img {
+    max-height: 350px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.info {
+    margin: 20px 0;
+}
+
+.info h2 {
+    border-bottom: 2px solid #333;
+    padding-bottom: 5px;
+}
+
+.info ul {
+    list-style: none;
+    padding: 0;
+}
+
+.info li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.info img {
+
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin: 10px;
+    object-fit: cover;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reviews ul {
+    list-style: none;
+    padding: 0;
+}
+
+.reviews li {
+    margin-bottom: 20px;
+}
+
+.reviews blockquote {
+    font-style: italic;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-left: 5px solid #333;
+    margin: 0;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #222;
+    color: white;
+    margin-top: 20px;
+}
+.flex-container {
+    display: flex;
+    flex-direction: row; /* Esto alinea los elementos en horizontal */
+}
+.left-container {
+    margin-right: auto; /* Empuja el siguiente elemento hacia la derecha */
+}
+
+.right-container {
+    margin-left: auto; /* Empuja el anterior elemento hacia la izquierda */
+}
+.centered-div {
+    width: 80%; /* Ajusta el ancho del div */
+    max-width: 600px; /* Limita el ancho máximo si es necesario */
+    background-color: #fff; 
+    padding: 20px; /* Espaciado interno */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    text-align: center; /* Centra el contenido del texto */
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineView - Director</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <main class=".centered-div">
+        <h1>🎬 CineView</h1>
+        <div class="movie-container">
+            <div class="flex-container">
+
+            
+                <div class="movie-header left-container">
+                    <h2>{{ director.nombre }}</h2>
+                    <p class="critica">{{ director.fecha_nacimiento }} - {{ director.nacionalidad }}</p>
+                </div>
+
+                <div class="movie-poster right-container">
+                    <img src="{{ director.foto }}" alt="Foto de {{ director.nombre }}">
+                </div>
+            </div>
+
+            <div class="sinopsis">
+                <h3>Biografía</h3>
+                <p>{{ director.biografia }}</p>
+            </div>
+
+            <div class="actors">
+                <h3>Películas dirigidas</h3>
+                <ul>
+                    {% for pelicula in director.peliculas %}
+                    <li>
+                        <img src="{{ pelicula.foto }}" alt="{{ pelicula.titulo }}">
+                        <a href="/film_page/{{ pelicula.id }}">{{ pelicula.titulo }} ({{ pelicula.año }})</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

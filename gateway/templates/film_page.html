@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ nombre }} - Página de la Película</title>
+    <link rel="stylesheet" href="/static/home_page_css.css">
+</head>
+<body>
+        <h1>🎬 CineView</h1>
+        <h2>{{ nombre }} ({{ anio }})</h2>
+
+    <main class=".centered-div">
+        <div class="flex-container">
+            <section class="caratula right-container">
+                <img src="{{ foto_car_tula }}" alt="Carátula de {{ nombre }}">
+            </section>
+    
+            <section class="info left-container">
+                <h2>Sinopsis</h2>
+                <p>{{ sinopsis }}</p>
+    
+    
+                <h2>Actores</h2>
+                <ul>
+                    {% for actor in actores %}
+                    <li>
+                        <img src="{{ actor[2] }}" alt="Foto de {{ actor[0] }}">
+                        <span>{{ actor[0] }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+    
+                <h2>Directores</h2>
+                <ul>
+                    {% for director in directores %}
+                    <li>
+                        <img src="{{ director[2] }}" alt="Foto de {{ director[0] }}">
+                        <span>{{ director[0] }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+        </div>
+
+        <section class="reviews">
+            <h2>Reseñas</h2>
+            {% if reviews %}
+                <ul>
+                    {% for review in reviews %}
+                    <li>
+                        <blockquote>{{ review.content }}</blockquote>
+                        <cite>- {{ review.username }}</cite>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay reseñas disponibles para esta película.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

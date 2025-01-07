@@ -132,24 +132,27 @@ app.get('/director/:id', verifyJwt,async (req, res) => {
   try {
     logger.info(`Buscando director con ID: ${directorId}`);
     const result = await session.run(
-      `MATCH(d:Director)
+      `
+      MATCH (d:Director)
       WHERE id(d) = $id
-        OPTIONAL MATCH (d)-[:DIRIGE]->(p:Película)
-        WITH d, 
-            collect(DISTINCT p {
-                id: toInteger(id(p)), 
-                titulo: p.titulo, 
-                año: p.año, 
-                crítica: p.crítica, 
-                foto: p.foto
-            }) AS peliculas
-        RETURN d {
-                id: toInteger(id(d))
-                nombre: d.nombre,
-                foto: d.foto,
-                fecha_nacimiento: d.fecha_nacimiento,
-                biografia: d.biografia,
-                peliculas: peliculas`,
+      OPTIONAL MATCH (d)-[:DIRIGE]->(p:Película)
+      WITH d, 
+           collect(DISTINCT {
+               id: toInteger(id(p)), 
+               titulo: p.titulo, 
+               año: p.año, 
+               crítica: p.crítica, 
+               foto: p.foto
+           }) AS peliculas
+      RETURN {
+          id: toInteger(id(d)),
+          nombre: d.nombre,
+          foto: d.foto,
+          fecha_nacimiento: d.fecha_nacimiento,
+          biografia: d.biografia,
+          peliculas: peliculas
+      } AS director
+      `,
       { id: directorId }
     );
 

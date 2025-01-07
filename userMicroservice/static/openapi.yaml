@@ -73,3 +73,43 @@ paths:
           description: Reseña añadida exitosamente
         "400":
           description: Faltan datos necesarios (user_id, movie_id, content)
+  /get_reviews_for_film_id:
+    post:
+      summary: Obtener todas las reseñas de una película por su ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                movie_id:
+                  type: integer
+                  example: 101
+      responses:
+        "200":
+          description: Reseñas obtenidas exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reviews:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user_id:
+                          type: integer
+                          example: 1
+                        content:
+                          type: string
+                          example: "Great movie! I loved it."
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: "2025-01-04T12:34:56"
+        "400":
+          description: Faltan datos necesarios (movie_id)
+        "404":
+          description: No se encontraron reseñas para esta película

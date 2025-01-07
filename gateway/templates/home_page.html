@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineView - Ver Películas</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>🎬 CineView</h1>
+    </header>
+    <main>
+        <!-- Carrusel dentro del contenedor wrapper -->
+        <div class="carousel-wrapper">
+            <div class="carousel-container" id="carousel">
+                <!-- Las películas se renderizan dinámicamente con Jinja -->
+                {% for pelicula in peliculas %}
+                    <div class="imgContainer">
+                        <img src="{{ pelicula.foto }}" alt="{{ pelicula.titulo }}" title="{{ pelicula.titulo }} ({{ pelicula.año }}) - {{ pelicula.crítica }}/10">
+                        <h3>{{ pelicula.titulo }}</h3>
+                        <p>{{ pelicula.titulo }} ({{ pelicula.año }}) - {{ pelicula.crítica }}/10</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>
