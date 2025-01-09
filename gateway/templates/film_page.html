@@ -10,6 +10,7 @@
     <main class="container">
         <h1>🎬 CineView</h1>
         <h2>{{ nombre }} ({{ anio }})</h2>
+        <p id="movieId" style="display: none;">{{ movie_id }}</p>
         <div class="flex-container">
             <!-- Sección de carátula -->
             <section class="caratula right-container">
@@ -77,39 +78,49 @@
             document.getElementById('reviewForm').addEventListener('submit', async (event) => {
                 event.preventDefault();
                 
+                // Obtener el contenido de la reseña
                 const content = document.getElementById('reviewContent').value.trim();
                 if (!content) {
                     alert('Por favor, escribe algo en la reseña.');
                     return;
                 }
 
+                // Obtener el movie_id desde el párrafo oculto
+                const movieId = document.getElementById('movieId').textContent.trim();
+                if (!movieId) {
+                    alert('Error: No se pudo obtener el ID de la película.');
+                    return;
+                }
+
                 try {
+                    console.log(localStorage.getItem('jwt'));
+                    // Llamar al servicio para agregar la reseña
                     const response = await fetch('/add_review', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                            'Authorization': `Bearer ${localStorage.getItem('jwt')}` // JWT del usuario
                         },
                         body: JSON.stringify({
-                            user_id: 0, // Sustituir por el ID real del usuario si está disponible
-                            movie_id: {{ movie_id | tojson }}, // Variable pasada desde la plantilla
+                            user_id: 1, // Sustituir por el ID real del usuario si está disponible
+                            movie_id: movieId, // movie_id obtenido del párrafo oculto
                             content: content
                         })
                     });
-                    
+
                     if (response.ok) {
                         alert('¡Reseña agregada exitosamente!');
                         location.reload();
                     } else {
                         const error = await response.json();
-                        alert(`Error al agregar la reseña: ${error.msg}`);
+                        alert(`Error al agregar la reseña: ${error.detail || error.msg}`);
                     }
                 } catch (error) {
                     console.error('Error:', error);
                     alert('Hubo un problema al agregar la reseña.');
                 }
             });
-        </script>        
+        </script>   
     </main>
 </body>
 </html>

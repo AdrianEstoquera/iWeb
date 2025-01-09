@@ -33,20 +33,29 @@ ALGORITHM = "HS256"
 
 # Seguridad para extraer el token
 security = HTTPBearer()
-
+jwt_to_userId = {}
 # Función para verificar el JWT
 def verify_jwt(http_authorization_credentials: str = Depends(security)):
-    """Verifica JWT en solicitudes protegidas.
-    Mediante Depends() podemos hacer una inyección de dependencia.
-    """
+    """Verifica JWT en solicitudes protegidas."""
     try:
+        # Verificar que se reciba el token
+        if not http_authorization_credentials:
+            raise HTTPException(status_code=401, detail="Authorization header missing")
+
+        print("Authorization header:", http_authorization_credentials)
+        
         token = http_authorization_credentials.credentials
+        print("Token recibido:", token)
+
+        # Decodificar el token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print("Payload decodificado:", payload)
+
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
 # Esta funcion genera un token JWT.
 # Este token es usado para que los microservicios solo respondan solicitudes
 # provenientes del gateway
@@ -73,12 +82,21 @@ async def login_proxy(request: Request):
         username = body.get("username")
         if not username:
             raise HTTPException(status_code=400, detail="Username is required")
+
         # Crear el JWT
         payload = {
             "sub": username,
             "exp": datetime.utcnow() + timedelta(hours=2),
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+        # Leer la respuesta del microservicio
+        service_response = json.loads(response.body.decode("utf-8"))  # Decodificar la respuesta
+        client_id = service_response.get("user_id")
+        if not client_id:
+            raise HTTPException(status_code=500, detail="Client ID missing in response")
+        else:
+            jwt_to_userId[token] = client_id
+            print(jwt_to_userId)
         return {"access_token": token, "token_type": "bearer"}
     else:
         raise HTTPException(status_code=response.status_code, detail="Login failed")
@@ -88,7 +106,29 @@ async def login_proxy(request: Request):
 async def add_review_proxy(request: Request, payload: dict = Depends(verify_jwt)):
     """Proxy para agregar reseñas, protegido por JWT."""
     # El payload contiene los datos decodificados del token
-    return await proxy_request(request, USER_SERVICE_URL)
+    print("JWT verified !")
+    # Obtener el JWT del encabezado Authorization
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+    
+    jwt_token = auth_header.split(" ")[1]  # Extraer el JWT del encabezado
+
+    # Recuperar el user_id del diccionario
+    user_id = jwt_to_userId.get(jwt_token)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="User ID not found for given JWT")
+    # Aquí obtenemos el contenido del cuerpo de la solicitud
+    request_data = await request.json()
+    print(f"User ID for JWT: {user_id}")
+    # Modificar el user_id en el cuerpo de la solicitud
+    request_data['user_id'] = user_id
+    # Crear un nuevo objeto Request con el cuerpo modificado
+    new_request = request
+    new_request._json = request_data  # Modificar el contenido JSON de la solicitud
+    
+    # Llamamos a proxy_request con el nuevo cuerpo modificado
+    return await proxy_request(new_request, USER_SERVICE_URL)
 @app.api_route("/get_reviews_for_film_id", methods=["POST"])
 async def register_proxy(request: Request):
     return await proxy_request(request, USER_SERVICE_URL)
@@ -111,18 +151,24 @@ async def get_all_peliculas_proxy(request: Request):
 # Función para reenviar las solicitudes al rest de microservicios
 async def proxy_request(request: Request, service_url: str):
     method = request.method
-    token = generate_service_token() # Generamos el token que autentica al gateway
+    token = generate_service_token()  # Generamos el token que autentica al gateway
     url = f"{service_url}{request.url.path}"
     print(f"Redirect to: {url}")
-    headers = dict(request.headers)
-    headers["Authorization"] = f"Bearer {token}"
+
+    # Crear un nuevo diccionario de encabezados para asegurar que "Authorization" es único
+    headers = {key: value for key, value in request.headers.items() if key.lower() != "authorization"}
+    headers["Authorization"] = f"Bearer {token}"  # Agregar el token del gateway
+    headers["Content-Type"] = "application/json"
+    # Obtener el contenido de la solicitud
     content = await request.body()
 
     try:
+        # Enviar la solicitud al microservicio
         response = await client.request(method, url, headers=headers, content=content)
-        return  JSONResponse(status_code=response.status_code, content=response.json())
+        return JSONResponse(status_code=response.status_code, content=response.json())
     except httpx.HTTPError as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
 
 # Sobrescribir el esquema OpenAPI de FastAPI con las especificaciones combinadas
 @app.on_event("startup")

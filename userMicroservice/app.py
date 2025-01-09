@@ -78,27 +78,35 @@ def login():
         return jsonify({"msg": "Login successful", "user_id": user.id}), 200
     else:
         return jsonify({"msg": "Bad username or password"}), 401
+import logging
 
-# Endpoint para añadir review
+logging.basicConfig(level=logging.DEBUG)
+
 @app.route('/add_review', methods=['POST'])
 def add_review():
     # Validar JWT
     validation_response = verify_jwt()
     if isinstance(validation_response, tuple):  # Si hubo error
         return validation_response
-    
-    data = request.get_json()
-    user_id = data.get('user_id')  # Recibimos el user_id directamente del JSON
+
+    try:
+        data = request.get_json()
+        app.logger.debug(f"Datos recibidos: {data}")  # Usamos logger en lugar de print
+    except Exception as e:
+        app.logger.error(f"Error al leer JSON: {str(e)}")
+        return jsonify({"msg": "Invalid JSON format"}), 400
+
+    user_id = data.get('user_id')
     movie_id = data.get('movie_id')
     content = data.get('content')
-    
-    if not user_id or not movie_id or not content:
-        return jsonify({"msg": "User ID, Movie ID, and content are required"}), 400
-    
+
+    # if not user_id or not movie_id or not content:
+    #     return jsonify({"msg": "User ID, Movie ID, and content are required"}), 400
+
     review = Review(user_id=user_id, movie_id=movie_id, content=content)
     db.session.add(review)
     db.session.commit()
-    
+
     return jsonify({"msg": "Review added successfully"}), 201
 
 @app.route("/get_reviews_for_film_id", methods=["POST"])
