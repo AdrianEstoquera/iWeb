@@ -4,29 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ nombre }} - Página de la Película</title>
-    <link rel="stylesheet" href="/static/home_page_css.css">
+    <link rel="stylesheet" href="/static/film_page_css.css">
 </head>
 <body>
+    <main class="container">
         <h1>🎬 CineView</h1>
         <h2>{{ nombre }} ({{ anio }})</h2>
-
-    <main class=".centered-div">
         <div class="flex-container">
+            <!-- Sección de carátula -->
             <section class="caratula right-container">
                 <img src="{{ foto_car_tula }}" alt="Carátula de {{ nombre }}">
             </section>
     
+            <!-- Sección de información -->
             <section class="info left-container">
                 <h2>Sinopsis</h2>
-                <p>{{ sinopsis }}</p>
-    
-    
+                <p>{{ sinopsis }}</p>    
+
                 <h2>Actores</h2>
                 <ul>
                     {% for actor in actores %}
                     <li>
-                        <img src="{{ actor[2] }}" alt="Foto de {{ actor[0] }}">
-                        <span>{{ actor[0] }}</span>
+                        <a href="/actor_page/{{ actor[1] }}" class="movie-link">
+                            <img src="{{ actor[2] }}" alt="Foto de {{ actor[0] }}">
+                            <span>{{ actor[0] }}</span>
+                        </a>
                     </li>
                     {% endfor %}
                 </ul>
@@ -35,30 +37,79 @@
                 <ul>
                     {% for director in directores %}
                     <li>
-                        <img src="{{ director[2] }}" alt="Foto de {{ director[0] }}">
-                        <span>{{ director[0] }}</span>
+                        <a href="/director_page/{{ director[1] }}" class="movie-link">
+                            <img src="{{ director[2] }}" alt="Foto de {{ director[0] }}">
+                            <span>{{ director[0] }}</span>
+                        </a>
                     </li>
                     {% endfor %}
                 </ul>
             </section>
-
         </div>
 
+        <!-- Sección de reseñas -->
         <section class="reviews">
             <h2>Reseñas</h2>
             {% if reviews %}
-                <ul>
-                    {% for review in reviews %}
-                    <li>
-                        <blockquote>{{ review.content }}</blockquote>
-                        <cite>- {{ review.username }}</cite>
-                    </li>
-                    {% endfor %}
-                </ul>
+            <ul>
+                {% for review in reviews %}
+                <li>
+                    <blockquote>{{ review.content }}</blockquote>
+                    <cite>- {{ review.username }}</cite>
+                </li>
+                {% endfor %}
+            </ul>
             {% else %}
-                <p>No hay reseñas disponibles para esta película.</p>
+            <p>No hay reseñas disponibles para esta película.</p>
             {% endif %}
+            <hr>
+            <!-- Formulario para añadir una reseña -->
+            <form id="reviewForm">
+                <h3>Añade tu reseña</h3>
+                <textarea id="reviewContent" name="content" rows="4" cols="50" placeholder="Escribe tu reseña aquí..."></textarea>
+                <br>
+                <button type="submit">Enviar reseña</button>
+            </form>
         </section>
+        
+        <!-- Script para manejar el formulario -->
+        <script>
+            document.getElementById('reviewForm').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                
+                const content = document.getElementById('reviewContent').value.trim();
+                if (!content) {
+                    alert('Por favor, escribe algo en la reseña.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/add_review', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                        },
+                        body: JSON.stringify({
+                            user_id: 0, // Sustituir por el ID real del usuario si está disponible
+                            movie_id: {{ movie_id | tojson }}, // Variable pasada desde la plantilla
+                            content: content
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        alert('¡Reseña agregada exitosamente!');
+                        location.reload();
+                    } else {
+                        const error = await response.json();
+                        alert(`Error al agregar la reseña: ${error.msg}`);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Hubo un problema al agregar la reseña.');
+                }
+            });
+        </script>        
     </main>
 </body>
 </html>

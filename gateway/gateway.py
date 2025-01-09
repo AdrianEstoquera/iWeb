@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 from fastapi.security import HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
+
 
 # URL del microservicio Flask
 USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://flask-api:5000")
@@ -175,6 +176,12 @@ async def shutdown():
 # Mount static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+# Favicon
+favicon_path = 'favicon.ico'
+
+@app.get('/favicon.ico', include_in_schema=False)
+async def favicon():
+    return FileResponse(favicon_path)
 # Pagina principal
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -221,6 +228,7 @@ async def read_film_page(request: Request, id_pelicula: int):
             "sinopsis": pelicula["sinopsis"],
             "foto_car_tula": pelicula["foto"],
             "reviews": reviews,
+            "movie_id":id_pelicula
         }
     )
 

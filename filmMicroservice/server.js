@@ -104,7 +104,7 @@ app.get('/pelicula/:id',verifyJwt, async (req, res) => {
            collect(DISTINCT d {nombre: d.nombre, foto: d.foto, id: toInteger(id(d))}) AS directores
       RETURN p {titulo: p.titulo, 
                 año: p.año, 
-                crítica: p.crítica, 
+                critica: p.critica, 
                 sinopsis: p.sinopsis, 
                 foto: p.foto, 
                 actores: actores, 
@@ -141,7 +141,7 @@ app.get('/director/:id', verifyJwt,async (req, res) => {
                id: toInteger(id(p)), 
                titulo: p.titulo, 
                año: p.año, 
-               crítica: p.crítica, 
+               critica: p.critica, 
                foto: p.foto
            }) AS peliculas
       RETURN {
@@ -178,7 +178,7 @@ app.get('/actor/:id',verifyJwt, async (req, res) => {
       WHERE id(a) = $id
       OPTIONAL MATCH (a)-[:ACTUA]->(p:Película)
       WITH a, 
-           collect(DISTINCT p {titulo: p.titulo, año: p.año, crítica: p.crítica, foto: p.foto, id: toInteger(id(p))}) AS peliculas
+           collect(DISTINCT p {titulo: p.titulo, año: p.año, critica: p.critica, foto: p.foto, id: toInteger(id(p))}) AS peliculas
       RETURN a {
                nombre: a.nombre,
                foto: a.foto,
@@ -216,7 +216,7 @@ app.get('/peliculas',verifyJwt, async (req, res) => {
                id: id(p),
                titulo: p.titulo,
                año: p.año,
-               crítica: p.crítica,
+               critica: p.critica,
                sinopsis: p.sinopsis,
                foto: p.foto,
                actores: actores,

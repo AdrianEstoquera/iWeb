@@ -16,11 +16,14 @@
             <div class="carousel-container" id="carousel">
                 <!-- Las películas se renderizan dinámicamente con Jinja -->
                 {% for pelicula in peliculas %}
-                    <div class="imgContainer">
-                        <img src="{{ pelicula.foto }}" alt="{{ pelicula.titulo }}" title="{{ pelicula.titulo }} ({{ pelicula.año }}) - {{ pelicula.crítica }}/10">
-                        <h3>{{ pelicula.titulo }}</h3>
-                        <p>{{ pelicula.titulo }} ({{ pelicula.año }}) - {{ pelicula.crítica }}/10</p>
-                    </div>
+                    <!-- Envolver en un enlace -->
+                    <a href="/film_page/{{ pelicula.id }}" class="movie-link">
+                        <div class="imgContainer">
+                            <img src="{{ pelicula.foto }}" alt="{{ pelicula.titulo }}" title="{{ pelicula.titulo }} ({{ pelicula.año }}) - {{ pelicula.critica }}/10">
+                            <h3>{{ pelicula.titulo }}</h3>
+                            <p>{{ pelicula.titulo }} ({{ pelicula.año }}) - {{ pelicula.critica }}/10</p>
+                        </div>
+                    </a>
                 {% endfor %}
             </div>
         </div>

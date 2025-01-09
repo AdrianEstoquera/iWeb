@@ -100,3 +100,34 @@ footer {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
     text-align: center; /* Centra el contenido del texto */
 }
+.container {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px 40px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas */
+    gap: 20px; /* Espacio entre elementos */
+    max-width: 1200px; /* Ancho máximo para el grid */
+  }
+
+li {
+text-align: center;
+border: 1px solid #ddd; /* Borde para cada tarjeta */
+border-radius: 8px; /* Bordes redondeados */
+overflow: hidden;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra */
+transition: transform 0.3s, box-shadow 0.3s; /* Animación al pasar el cursor */
+}
+
+li:hover {
+transform: translateY(-5px); /* Efecto de elevación */
+box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+}
