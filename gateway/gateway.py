@@ -157,7 +157,7 @@ async def proxy_request(request: Request, service_url: str):
 
     # Crear un nuevo diccionario de encabezados para asegurar que "Authorization" es único
     headers = {key: value for key, value in request.headers.items() if key.lower() != "authorization"}
-    headers["Authorization"] = f"Bearer {token}"  # Agregar el token del gateway
+    headers["Authorization"] = f"Bearer {token}"  # Añadir el token del gateway
     headers["Content-Type"] = "application/json"
     # Obtener el contenido de la solicitud
     content = await request.body()
@@ -229,13 +229,13 @@ favicon_path = 'favicon.ico'
 async def favicon():
     return FileResponse(favicon_path)
 # Pagina principal
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
-@app.get("/register_user", response_class=HTMLResponse)
+@app.get("/register_user", response_class=HTMLResponse, include_in_schema=False)
 async def read_root(request: Request):
     return templates.TemplateResponse("register_user.html", {"request": request})
-@app.get("/home_page", response_class=HTMLResponse)
+@app.get("/home_page", response_class=HTMLResponse, include_in_schema=False)
 async def home_page(request: Request):
     # Hacer una solicitud para obtener todas las películas
     async with httpx.AsyncClient() as client:
@@ -244,7 +244,7 @@ async def home_page(request: Request):
 
     # Pasar las películas a la plantilla
     return templates.TemplateResponse("home_page.html", {"request": request, "peliculas": peliculas})
-@app.get("/film_page/{id_pelicula}", response_class=HTMLResponse)
+@app.get("/film_page/{id_pelicula}", response_class=HTMLResponse, include_in_schema=False)
 async def read_film_page(request: Request, id_pelicula: int):
     # Obtener la información de la película
     async with httpx.AsyncClient() as client:
@@ -278,14 +278,14 @@ async def read_film_page(request: Request, id_pelicula: int):
         }
     )
 
-@app.get("/director_page/{id_director}", response_class=HTMLResponse)
+@app.get("/director_page/{id_director}", response_class=HTMLResponse, include_in_schema=False)
 async def read_film_page(request: Request, id_director: int):
     # Obtenemos infor del director
     director_response = await client.get(f"http://localhost:8080/director/{id_director}")
     director = director_response.json()
     return templates.TemplateResponse("director_page.html", {"request": request, "director": director})
 
-@app.get("/actor_page/{id}", response_class=HTMLResponse)
+@app.get("/actor_page/{id}", response_class=HTMLResponse, include_in_schema=False)
 async def read_film_page(request: Request, id: int):
     # Obtenemos infor del director
     resp = await client.get(f"http://localhost:8080/actor/{id}")

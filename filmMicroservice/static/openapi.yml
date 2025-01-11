@@ -17,7 +17,7 @@ paths:
           description: ID de la película
           schema:
             type: integer
-            example: 5
+            example: 16
       responses:
         '200':
           description: Información detallada de la película
@@ -83,7 +83,7 @@ paths:
           description: ID del director
           schema:
             type: integer
-            example: 9
+            example: 108
       responses:
         '200':
           description: Información detallada del director
@@ -143,7 +143,7 @@ paths:
           description: ID del actor
           schema:
             type: integer
-            example: 7
+            example: 12
       responses:
         '200':
           description: Información detallada del actor
